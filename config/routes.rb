@@ -1,7 +1,11 @@
 Rails.application.routes.draw do
 
-  api_version(:module => "V1", :path => {:value => "v1"}) do
-    mount_devise_token_auth_for 'User', at: 'auth'
+  scope :api, defaults: { format: :json } do
+    namespace :v1 do
+      resources :posts
+    end
   end
+
+  mount_devise_token_auth_for 'User', at: '/api/v1/auth'
 
 end

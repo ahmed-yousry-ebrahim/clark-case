@@ -12,9 +12,6 @@ gem 'pg'
 # To use Jbuilder templates for JSON
 gem 'jbuilder'
 
-# api versioning
-gem 'versionist'
-
 # authentication
 gem 'devise_token_auth'
 
