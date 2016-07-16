@@ -152,5 +152,13 @@ describe V1::PostsController do
         }.to change(Comment, :count).by(-1)
       end
     end
+
+    context "unauthenticated session" do
+      it "respond with unauthenticated if no user session is present" do
+        post = FactoryGirl.create(:post)
+        delete :destroy, {:id => post.id}, valid_session
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
   end
 end
