@@ -23,6 +23,7 @@ group :test do
   gem 'factory_girl_rails', '~> 4.0'
   gem 'rspec-rails'
   gem 'hashie'
+  gem 'faker'
 end
 
 group :production do

@@ -18,6 +18,7 @@ class V1::PostsController < ApplicationController
   # POST /posts.json
   def create
     @post = Post.new(post_params)
+    @post.user = current_user
     if @post.save
       render json: (render_to_string(partial: 'post', locals: { post: @post })), status: :created
     else
@@ -49,9 +50,9 @@ class V1::PostsController < ApplicationController
   # GET /posts/1/toggle_like.json
   def toggle_like
     if current_user.toggle_like!(@post)
-      render json: {:likes_count => @post.likers_count}, status: :ok
+      render json: {:likers_count => @post.likers_count}, status: :ok
     else
-      render json: {:likes_count => @post.likers_count}, status: :internal_server_error
+      render json: {:likers_count => @post.likers_count}, status: :internal_server_error
     end
   end
 
