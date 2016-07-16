@@ -135,6 +135,8 @@ GEM
       rspec-mocks (~> 3.5.0)
       rspec-support (~> 3.5.0)
     rspec-support (3.5.0)
+    socialization (1.1.0)
+      activerecord
     spring (1.7.2)
     sprockets (3.6.3)
       concurrent-ruby (~> 1.0)
@@ -163,6 +165,7 @@ DEPENDENCIES
   rails-api
   rails_12factor
   rspec-rails
+  socialization
   spring
 
 BUNDLED WITH

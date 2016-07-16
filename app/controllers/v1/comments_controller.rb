@@ -1,7 +1,7 @@
 class V1::CommentsController < ApplicationController
   before_action :authenticate_user!, only: [:create, :update, :destroy]
   before_action :set_post
-  before_action :set_comment, only: [:show, :update, :destroy]
+  before_action :set_comment, only: [:show, :update, :destroy, :toggle_like]
 
   # GET /comments
   # GET /comments.json
@@ -44,6 +44,17 @@ class V1::CommentsController < ApplicationController
     @comment.destroy
 
     head :no_content
+  end
+
+  # GET /comments/1/toggle_like
+  # GET /comments/1/toggle_like.json
+
+  def toggle_like
+    if current_user.toggle_like!(@comment)
+      render json: {:likes_count => @comment.likers_count}, status: :ok
+    else
+      render json: {:likes_count => @comment.likers_count}, status: :internal_server_error
+    end
   end
 
   private

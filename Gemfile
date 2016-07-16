@@ -15,6 +15,9 @@ gem 'jbuilder'
 # authentication
 gem 'devise_token_auth'
 
+# likes
+gem 'socialization'
+
 
 group :test do
   gem 'factory_girl_rails', '~> 4.0'

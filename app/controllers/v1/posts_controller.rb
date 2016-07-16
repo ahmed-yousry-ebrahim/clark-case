@@ -1,6 +1,6 @@
 class V1::PostsController < ApplicationController
   before_action :authenticate_user!, only: [:create, :update, :destroy]
-  before_action :set_post, only: [:show, :update, :destroy]
+  before_action :set_post, only: [:show, :update, :destroy, :toggle_like]
 
   # GET /posts
   # GET /posts.json
@@ -43,6 +43,16 @@ class V1::PostsController < ApplicationController
     @post.destroy
 
     head :no_content
+  end
+
+  # GET /posts/1/toggle_like
+  # GET /posts/1/toggle_like.json
+  def toggle_like
+    if current_user.toggle_like!(@post)
+      render json: {:likes_count => @post.likers_count}, status: :ok
+    else
+      render json: {:likes_count => @post.likers_count}, status: :internal_server_error
+    end
   end
 
   private
