@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'helpers/v1/auth_helper'
 
 describe V1::PostsController do
   before(:each) do
