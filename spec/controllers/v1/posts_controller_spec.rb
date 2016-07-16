@@ -161,4 +161,42 @@ describe V1::PostsController do
       end
     end
   end
+
+
+  describe "toggle like #toggle_like" do
+    context "authenticated session" do
+      before(:each) do
+        @user = FactoryGirl.create(:user)
+        request.headers.merge!(@user.create_new_auth_token)
+      end
+      it "like a post" do
+        post = FactoryGirl.create(:post)
+        get :toggle_like, {:id => post.id}
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response['likers_count']).to eq(1)
+      end
+
+      it "like return success status" do
+        post = FactoryGirl.create(:post)
+        get :toggle_like, {:id => post.id}
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "unlike a post" do
+        post = FactoryGirl.create(:post)
+        @user.like!(post)
+        get :toggle_like, {:id => post.id}
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response['likers_count']).to eq(0)
+      end
+    end
+
+    context "unauthenticated session" do
+      it "respond with unauthenticated if no user session is present" do
+        post = FactoryGirl.create(:post)
+        delete :destroy, {:id => post.id}, valid_session
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
 end

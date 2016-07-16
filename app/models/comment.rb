@@ -4,4 +4,8 @@ class Comment < ActiveRecord::Base
   belongs_to :post
 
   validates_presence_of :text
+
+  def likers_count
+    self.likers(User).count
+  end
 end

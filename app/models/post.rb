@@ -4,4 +4,8 @@ class Post < ActiveRecord::Base
   has_many :comments, :dependent => :delete_all
 
   validates_presence_of :body
+
+  def likers_count
+    self.likers(User).count
+  end
 end
