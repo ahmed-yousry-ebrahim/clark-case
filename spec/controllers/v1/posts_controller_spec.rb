@@ -73,10 +73,6 @@ describe V1::PostsController do
 
   describe "PUT #update" do
     context "authenticated session" do
-      before(:each) do
-        user = FactoryGirl.create(:user)
-        request.headers.merge!(user.create_new_auth_token)
-      end
       context "with valid params" do
         let(:new_attributes) {
           {:body => "updated post"}
@@ -84,6 +80,7 @@ describe V1::PostsController do
 
         it "updates the requested post" do
           post = FactoryGirl.create(:post)
+          request.headers.merge!(post.user.create_new_auth_token)
           put :update, format: :json, :id => post.id, :post => new_attributes
           post.reload
           expect(post.body).to eq("updated post")
@@ -91,12 +88,30 @@ describe V1::PostsController do
 
         it "assigns the requested post as @post" do
           post = FactoryGirl.create(:post)
+          request.headers.merge!(post.user.create_new_auth_token)
           put :update, format: :json, :id => post.id, :post => new_attributes
           expect(assigns(:post)).to eq(post)
         end
 
         it "respond with success response code" do
           post = FactoryGirl.create(:post)
+          request.headers.merge!(post.user.create_new_auth_token)
+          put :update, format: :json, :id => post.id, :post => new_attributes
+          expect(response).to have_http_status(:ok)
+        end
+
+        it "only post owner can update his post" do
+          post = FactoryGirl.create(:post)
+          random_user = FactoryGirl.create(:user)
+          request.headers.merge!(random_user.create_new_auth_token)
+          put :update, format: :json, :id => post.id, :post => new_attributes
+          expect(response).to have_http_status(:unauthorized)
+        end
+
+        it "admin user can update any post" do
+          post = FactoryGirl.create(:post)
+          admin_user = FactoryGirl.create(:admin_user)
+          request.headers.merge!(admin_user.create_new_auth_token)
           put :update, format: :json, :id => post.id, :post => new_attributes
           expect(response).to have_http_status(:ok)
         end
@@ -108,6 +123,7 @@ describe V1::PostsController do
         }
         it "doesn't update a post if it has no body" do
           post = FactoryGirl.create(:post)
+          request.headers.merge!(post.user.create_new_auth_token)
           put :update, format: :json, :id => post.id, :post => invalid_new_attributes
           expect(response).to have_http_status(:unprocessable_entity)
         end
@@ -128,12 +144,9 @@ describe V1::PostsController do
 
   describe "DELETE #destroy" do
     context "authenticated session" do
-      before(:each) do
-        user = FactoryGirl.create(:user)
-        request.headers.merge!(user.create_new_auth_token)
-      end
       it "destroys the requested post" do
         post = FactoryGirl.create(:post)
+        request.headers.merge!(post.user.create_new_auth_token)
         expect {
           delete :destroy, {:id => post.id}
         }.to change(Post, :count).by(-1)
@@ -141,15 +154,33 @@ describe V1::PostsController do
 
       it "return the no content status" do
         post = FactoryGirl.create(:post)
+        request.headers.merge!(post.user.create_new_auth_token)
         delete :destroy, {:id => post.id}
         expect(response).to have_http_status(:no_content)
       end
 
       it "cascade the delete to the children comments of a deleted post" do
         comment = FactoryGirl.create(:comment)
+        request.headers.merge!(comment.post.user.create_new_auth_token)
         expect {
           delete :destroy, {:id => comment.post.id}
         }.to change(Comment, :count).by(-1)
+      end
+
+      it "only post owner can delete his post" do
+        post = FactoryGirl.create(:post)
+        random_user = FactoryGirl.create(:user)
+        request.headers.merge!(random_user.create_new_auth_token)
+        delete :destroy, {:id => post.id}
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "admin user can update any post" do
+        post = FactoryGirl.create(:post)
+        admin_user = FactoryGirl.create(:admin_user)
+        request.headers.merge!(admin_user.create_new_auth_token)
+        delete :destroy, {:id => post.id}
+        expect(response).to have_http_status(:no_content)
       end
     end
 

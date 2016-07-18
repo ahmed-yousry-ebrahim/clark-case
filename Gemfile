@@ -15,8 +15,12 @@ gem 'jbuilder'
 # authentication
 gem 'devise_token_auth'
 
+#authorization
+gem 'cancancan', '~> 1.10'
+
 # likes
 gem 'socialization'
+
 
 
 group :test do

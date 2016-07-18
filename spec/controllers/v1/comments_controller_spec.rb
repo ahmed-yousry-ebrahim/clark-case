@@ -75,10 +75,6 @@ describe V1::CommentsController do
 
   describe "PUT #update" do
     context "authenticated session" do
-      before(:each) do
-        user = FactoryGirl.create(:user)
-        request.headers.merge!(user.create_new_auth_token)
-      end
       context "with valid params" do
         let(:new_attributes) {
           {:text => "updated comment"}
@@ -86,6 +82,7 @@ describe V1::CommentsController do
 
         it "updates the requested comment" do
           comment = FactoryGirl.create(:comment)
+          request.headers.merge!(comment.user.create_new_auth_token)
           put :update, format: :json, :post_id => temp_post.id, :id => comment.id, :comment => new_attributes
           comment.reload
           expect(comment.text).to eq("updated comment")
@@ -93,12 +90,30 @@ describe V1::CommentsController do
 
         it "assigns the requested comment as @comment" do
           comment = FactoryGirl.create(:comment)
+          request.headers.merge!(comment.user.create_new_auth_token)
           put :update, format: :json, :post_id => temp_post.id, :id => comment.id, :comment => new_attributes
           expect(assigns(:comment)).to eq(comment)
         end
 
         it "respond with success response code" do
           comment = FactoryGirl.create(:comment)
+          request.headers.merge!(comment.user.create_new_auth_token)
+          put :update, format: :json, :post_id => temp_post.id, :id => comment.id, :comment => new_attributes
+          expect(response).to have_http_status(:ok)
+        end
+
+        it "only comment owner can update his comment" do
+          comment = FactoryGirl.create(:comment)
+          random_user = FactoryGirl.create(:user)
+          request.headers.merge!(random_user.create_new_auth_token)
+          put :update, format: :json, :post_id => temp_post.id, :id => comment.id, :comment => new_attributes
+          expect(response).to have_http_status(:unauthorized)
+        end
+
+        it "admin user can update any comment" do
+          comment = FactoryGirl.create(:comment)
+          admin_user = FactoryGirl.create(:admin_user)
+          request.headers.merge!(admin_user.create_new_auth_token)
           put :update, format: :json, :post_id => temp_post.id, :id => comment.id, :comment => new_attributes
           expect(response).to have_http_status(:ok)
         end
@@ -110,6 +125,7 @@ describe V1::CommentsController do
         }
         it "doesn't update a comment if it has no body" do
           comment = FactoryGirl.create(:comment)
+          request.headers.merge!(comment.user.create_new_auth_token)
           put :update, format: :json, :post_id => temp_post.id, :id => comment.id, :comment => invalid_new_attributes
           expect(response).to have_http_status(:unprocessable_entity)
         end
@@ -130,12 +146,9 @@ describe V1::CommentsController do
 
   describe "DELETE #destroy" do
     context "authenticated session" do
-      before(:each) do
-        user = FactoryGirl.create(:user)
-        request.headers.merge!(user.create_new_auth_token)
-      end
       it "destroys the requested comment" do
         comment = FactoryGirl.create(:comment)
+        request.headers.merge!(comment.user.create_new_auth_token)
         expect {
           delete :destroy, {:post_id => comment.post.id, :id => comment.id}
         }.to change(Comment, :count).by(-1)
@@ -143,6 +156,23 @@ describe V1::CommentsController do
 
       it "return the no content status" do
         comment = FactoryGirl.create(:comment)
+        request.headers.merge!(comment.user.create_new_auth_token)
+        delete :destroy, {:post_id => comment.post.id, :id => comment.id}
+        expect(response).to have_http_status(:no_content)
+      end
+
+      it "only comment owner can delete his comment" do
+        comment = FactoryGirl.create(:comment)
+        random_user = FactoryGirl.create(:user)
+        request.headers.merge!(random_user.create_new_auth_token)
+        delete :destroy, {:post_id => comment.post.id, :id => comment.id}
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "admin user can update any comment" do
+        comment = FactoryGirl.create(:comment)
+        admin_user = FactoryGirl.create(:admin_user)
+        request.headers.merge!(admin_user.create_new_auth_token)
         delete :destroy, {:post_id => comment.post.id, :id => comment.id}
         expect(response).to have_http_status(:no_content)
       end
