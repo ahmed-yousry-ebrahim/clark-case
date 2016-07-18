@@ -21,6 +21,8 @@ gem 'cancancan', '~> 1.10'
 # likes
 gem 'socialization'
 
+# documentation gem
+gem 'apipie-rails'
 
 
 group :test do
