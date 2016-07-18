@@ -10,13 +10,13 @@ describe V1::PostsController do
   let(:invalid_post_data) {{:non_post_attribute => "no data"}}
   describe "GET #index" do
     it "doesn't get any posts if there is none" do
-      get :index, {}, valid_session
+      get :index, {}
       expect(assigns(:posts)).to eq([])
     end
 
     it "assigns all posts as @posts" do
       post = FactoryGirl.create(:post)
-      get :index, {}, valid_session
+      get :index, {}
       expect(assigns(:posts)).to eq([post])
     end
   end
@@ -24,7 +24,7 @@ describe V1::PostsController do
   describe "GET #show" do
     it "assigns the requested post as @post" do
       post = FactoryGirl.create(:post)
-      get :show, {:id => post.to_param}, valid_session
+      get :show, {:id => post.to_param}
       expect(assigns(:post)).to eq(post)
     end
   end
@@ -135,20 +135,20 @@ describe V1::PostsController do
       it "destroys the requested post" do
         post = FactoryGirl.create(:post)
         expect {
-          delete :destroy, {:id => post.id}, valid_session
+          delete :destroy, {:id => post.id}
         }.to change(Post, :count).by(-1)
       end
 
       it "return the no content status" do
         post = FactoryGirl.create(:post)
-        delete :destroy, {:id => post.id}, valid_session
+        delete :destroy, {:id => post.id}
         expect(response).to have_http_status(:no_content)
       end
 
       it "cascade the delete to the children comments of a deleted post" do
         comment = FactoryGirl.create(:comment)
         expect {
-          delete :destroy, {:id => comment.post.id}, valid_session
+          delete :destroy, {:id => comment.post.id}
         }.to change(Comment, :count).by(-1)
       end
     end
@@ -156,7 +156,7 @@ describe V1::PostsController do
     context "unauthenticated session" do
       it "respond with unauthenticated if no user session is present" do
         post = FactoryGirl.create(:post)
-        delete :destroy, {:id => post.id}, valid_session
+        delete :destroy, {:id => post.id}
         expect(response).to have_http_status(:unauthorized)
       end
     end
@@ -194,7 +194,7 @@ describe V1::PostsController do
     context "unauthenticated session" do
       it "respond with unauthenticated if no user session is present" do
         post = FactoryGirl.create(:post)
-        delete :destroy, {:id => post.id}, valid_session
+        delete :destroy, {:id => post.id}
         expect(response).to have_http_status(:unauthorized)
       end
     end

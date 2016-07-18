@@ -1,5 +1,5 @@
 class V1::CommentsController < ApplicationController
-  before_action :authenticate_user!, only: [:create, :update, :destroy]
+  before_action :authenticate_user!, only: [:create, :update, :destroy, :toggle_like]
   before_action :set_post
   before_action :set_comment, only: [:show, :update, :destroy, :toggle_like]
 
@@ -19,6 +19,8 @@ class V1::CommentsController < ApplicationController
   # POST /comments.json
   def create
     @comment = Comment.new(comment_params)
+    @comment.user = current_user
+    @comment.post = @post
     if @comment.save
       render json: (render_to_string(partial: 'comment', locals: { comment: @comment })), status: :created
     else
@@ -30,7 +32,6 @@ class V1::CommentsController < ApplicationController
   # PATCH/PUT /comments/1.json
   def update
     @comment = Comment.find(params[:id])
-
     if @comment.update(comment_params)
       render json: (render_to_string(partial: 'comment', locals: { comment: @comment })), status: :ok
     else
@@ -51,9 +52,9 @@ class V1::CommentsController < ApplicationController
 
   def toggle_like
     if current_user.toggle_like!(@comment)
-      render json: {:likes_count => @comment.likers_count}, status: :ok
+      render json: {:likers_count => @comment.likers_count}, status: :ok
     else
-      render json: {:likes_count => @comment.likers_count}, status: :internal_server_error
+      render json: {:likers_count => @comment.likers_count}, status: :internal_server_error
     end
   end
 
